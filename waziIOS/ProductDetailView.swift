@@ -49,27 +49,51 @@ struct ProductDetailView: View {
     }
 
     private var productHero: some View {
-        ZStack {
+        ZStack(alignment: .topLeading) {
             RoundedRectangle(cornerRadius: 34, style: .continuous)
                 .fill(
                     LinearGradient(
-                        colors: [Color.white.opacity(0.9), Color(red: 0.90, green: 0.89, blue: 0.86)],
+                        colors: [
+                            Color.white.opacity(0.96),
+                            Color(red: 0.92, green: 0.90, blue: 0.86)
+                        ],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
                 )
                 .frame(height: 370)
 
-            VStack(spacing: 20) {
-                HStack(spacing: 28) {
-                    SockShape(color: selectedColor, height: 230)
-                    SockShape(color: selectedColor, height: 214)
+            VStack(alignment: .leading, spacing: 18) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(selectedColor.name)
+                            .font(.system(size: 22, weight: .bold, design: .serif))
+
+                        Text(selectedColor.description)
+                            .font(.system(size: 14))
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Spacer()
+
+                    Text("WAZI ONE")
+                        .font(.system(size: 11, weight: .bold))
+                        .kerning(1.6)
+                        .foregroundStyle(Color.black.opacity(0.44))
                 }
 
-                Text(selectedColor.description)
-                    .font(.system(size: 16))
-                    .foregroundStyle(.secondary)
+                Spacer()
+
+                SockDisplayScene(primaryColor: selectedColor, secondaryColor: nil, layout: .product)
+                    .frame(height: 230)
+
+                HStack(spacing: 10) {
+                    detailChip(text: "精梳棉质感")
+                    detailChip(text: "轻微弹性")
+                    detailChip(text: "日常通勤")
+                }
             }
+            .padding(24)
         }
     }
 
@@ -108,6 +132,15 @@ struct ProductDetailView: View {
         }
     }
 
+    private func detailChip(text: String) -> some View {
+        Text(text)
+            .font(.system(size: 13, weight: .semibold))
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .background(Color.white.opacity(0.84))
+            .clipShape(Capsule())
+    }
+
     private var priceSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("价格")
@@ -132,22 +165,6 @@ struct ProductDetailView: View {
         .padding(22)
         .background(Color.white.opacity(0.85))
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-    }
-}
-
-private struct SockShape: View {
-    let color: SockColor
-    let height: CGFloat
-
-    var body: some View {
-        RoundedRectangle(cornerRadius: 32, style: .continuous)
-            .fill(color.tint)
-            .frame(width: 86, height: height)
-            .overlay(
-                RoundedRectangle(cornerRadius: 32, style: .continuous)
-                    .stroke(color.stroke, lineWidth: 1)
-            )
-            .shadow(color: .black.opacity(color == .white ? 0.06 : 0.12), radius: 20, y: 10)
     }
 }
 

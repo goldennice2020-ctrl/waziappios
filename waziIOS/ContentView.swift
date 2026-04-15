@@ -100,23 +100,47 @@ struct ContentView: View {
     private var heroCard: some View {
         ZStack(alignment: .bottomLeading) {
             RoundedRectangle(cornerRadius: 34, style: .continuous)
-                .fill(Color(red: 0.17, green: 0.17, blue: 0.18))
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color(red: 0.12, green: 0.12, blue: 0.13),
+                            Color(red: 0.23, green: 0.23, blue: 0.24)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
                 .frame(height: 420)
 
             VStack(alignment: .leading, spacing: 18) {
+                HStack {
+                    Text("EDITORIAL DROP")
+                        .font(.system(size: 12, weight: .bold))
+                        .kerning(1.8)
+                        .foregroundStyle(.white.opacity(0.62))
+
+                    Spacer()
+
+                    Text("BLACK / GRAY / WHITE")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundStyle(.white.opacity(0.48))
+                }
+
                 Spacer()
 
-                HStack(spacing: 16) {
-                    SockHero(color: .black)
-                    SockHero(color: .gray)
-                    SockHero(color: .white)
-                }
-                .padding(.bottom, 12)
+                SockDisplayScene(primaryColor: .black, secondaryColor: .gray, layout: .editorial)
+                    .frame(height: 220)
+                    .padding(.bottom, 6)
 
                 Text("减少选择，只留下一双值得买的袜子。")
                     .font(.system(size: 22, weight: .semibold, design: .serif))
                     .foregroundStyle(.white)
                     .fixedSize(horizontal: false, vertical: true)
+
+                Text("一双能覆盖大多数日常穿着场景的基础袜，用更少选择换来更好的决定。")
+                    .font(.system(size: 14))
+                    .foregroundStyle(.white.opacity(0.68))
+                    .lineSpacing(3)
             }
             .padding(28)
         }
@@ -161,33 +185,6 @@ struct ContentView: View {
         .padding(24)
         .background(Color.white.opacity(0.74))
         .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-    }
-}
-
-private struct SockHero: View {
-    let color: SockColor
-
-    var body: some View {
-        VStack(spacing: 0) {
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(color.tint)
-                .frame(width: 58, height: 170)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .stroke(color.stroke, lineWidth: 1)
-                )
-                .overlay(alignment: .top) {
-                    Circle()
-                        .fill(Color.white.opacity(color == .white ? 0.18 : 0.08))
-                        .frame(width: 18, height: 18)
-                        .padding(.top, 20)
-                }
-
-            Text(color.name)
-                .font(.system(size: 13, weight: .medium))
-                .foregroundStyle(.white.opacity(0.82))
-                .padding(.top, 12)
-        }
     }
 }
 

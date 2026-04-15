@@ -16,7 +16,6 @@
 
 - 入口页：品牌、理念、主视觉、进入商店
 - 商品页：袜子展示、颜色选择、固定价格、库存展示
-- 支付页：订单摘要、支付宝收款码弹层、付款确认
 - 支付页：订单摘要、支付步骤说明、收款码展示卡片、付款确认
 - 地址填写页：姓名、手机、详细地址
 - 订单页：订单状态、订单信息、收货信息
@@ -28,6 +27,8 @@
   入口页与应用主导航
 - `waziIOS/ProductDetailView.swift`
   商品页与颜色选择
+- `waziIOS/ProductVisuals.swift`
+  可复用的袜子视觉陈列组件
 - `waziIOS/CheckoutView.swift`
   支付页与二维码流程
 - `waziIOS/AddressFormView.swift`
