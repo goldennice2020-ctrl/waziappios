@@ -62,7 +62,7 @@ struct ShippingAddress: Hashable, Codable {
 }
 
 enum PreviewData {
-    @MainActor static let store = ShopStore()
+    @MainActor static let store = ShopStore(repository: LocalOrderRepository())
 }
 
 enum PaymentState: String, Codable {
@@ -112,14 +112,19 @@ final class ShopStore: ObservableObject {
     let product: ProductSnapshot
     @Published var inventoryCount = 88
     @Published var orders: [SockOrder] = []
+    @Published var isLoading = false
+    @Published var errorMessage: String?
 
     private let repository: OrderRepository
 
-    init(repository: OrderRepository = LocalOrderRepository()) {
+    init(repository: OrderRepository = AppEnvironment.makeRepository()) {
         self.repository = repository
         self.product = repository.product
         self.inventoryCount = repository.inventoryCount
-        self.orders = repository.seedOrders()
+
+        Task {
+            await refreshOrders()
+        }
     }
 
     var orderCount: Int {
@@ -134,25 +139,69 @@ final class ShopStore: ObservableObject {
         orders.filter { $0.address == nil }
     }
 
-    func createPaidOrder(color: SockColor) -> SockOrder {
-        if inventoryCount > 0 {
-            inventoryCount -= 1
+    func refreshOrders() async {
+        isLoading = true
+
+        defer {
+            isLoading = false
         }
-        let order = repository.createPaidOrder(color: color, existingOrdersCount: orders.count)
-        orders.insert(order, at: 0)
-        return order
+
+        do {
+            orders = try await repository.loadOrders()
+            errorMessage = nil
+        } catch {
+            errorMessage = "订单加载失败，请稍后重试。"
+        }
     }
 
-    func saveAddress(for orderID: UUID, address: ShippingAddress) {
-        guard let index = orders.firstIndex(where: { $0.id == orderID }) else { return }
+    func createPaidOrder(color: SockColor) async -> SockOrder? {
+        guard inventoryCount > 0 else {
+            errorMessage = "库存不足。"
+            return nil
+        }
+
+        do {
+            let order = try await repository.createPaidOrder(color: color, existingOrdersCount: orders.count)
+            inventoryCount -= 1
+            orders.insert(order, at: 0)
+            errorMessage = nil
+            return order
+        } catch {
+            errorMessage = "创建订单失败，请稍后重试。"
+            return nil
+        }
+    }
+
+    func saveAddress(for orderID: UUID, address: ShippingAddress) async -> Bool {
+        guard let index = orders.firstIndex(where: { $0.id == orderID }) else { return false }
+
+        do {
+            try await repository.saveAddress(orderID: orderID, address: address)
+            errorMessage = nil
+        } catch {
+            errorMessage = "提交地址失败，请稍后重试。"
+            return false
+        }
+
         orders[index].address = address
         orders[index].shippingState = .readyToShip
+        return true
     }
 
-    func markShipped(orderID: UUID, trackingNumber: String) {
-        guard let index = orders.firstIndex(where: { $0.id == orderID }) else { return }
+    func markShipped(orderID: UUID, trackingNumber: String) async -> Bool {
+        guard let index = orders.firstIndex(where: { $0.id == orderID }) else { return false }
+
+        do {
+            try await repository.markShipped(orderID: orderID, trackingNumber: trackingNumber)
+            errorMessage = nil
+        } catch {
+            errorMessage = "更新发货状态失败，请稍后重试。"
+            return false
+        }
+
         orders[index].trackingNumber = trackingNumber.isEmpty ? "待补充" : trackingNumber
         orders[index].shippingState = .shipped
+        return true
     }
 
     func order(for id: UUID) -> SockOrder? {

@@ -39,6 +39,13 @@ struct AdminDashboardView: View {
             .padding(24)
         }
         .background(Color(red: 0.96, green: 0.95, blue: 0.92).ignoresSafeArea())
+        .alert("提示", isPresented: errorAlertBinding) {
+            Button("知道了", role: .cancel) {
+                store.errorMessage = nil
+            }
+        } message: {
+            Text(store.errorMessage ?? "")
+        }
     }
 
     private func statCard(title: String, value: String) -> some View {
@@ -79,7 +86,9 @@ struct AdminDashboardView: View {
             }
 
             Button {
-                store.markShipped(orderID: order.id, trackingNumber: "SF\(order.orderNumber.suffix(6))")
+                Task {
+                    _ = await store.markShipped(orderID: order.id, trackingNumber: "SF\(order.orderNumber.suffix(6))")
+                }
             } label: {
                 Text(order.shippingState == .shipped ? "已发货" : "修改发货状态")
                     .font(.system(size: 15, weight: .semibold))
@@ -104,5 +113,16 @@ struct AdminDashboardView: View {
             Text(value)
                 .fontWeight(.medium)
         }
+    }
+
+    private var errorAlertBinding: Binding<Bool> {
+        Binding(
+            get: { store.errorMessage != nil },
+            set: { isPresented in
+                if !isPresented {
+                    store.errorMessage = nil
+                }
+            }
+        )
     }
 }

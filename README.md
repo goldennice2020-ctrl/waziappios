@@ -53,19 +53,41 @@
 1. `Product -> Clean Build Folder`
 2. 再重新运行
 
+## Supabase 接入
+
+当前工程已经内置了一个不依赖第三方 SDK 的 Supabase REST 仓储：
+
+- `waziIOS/SupabaseOrderRepository.swift`
+- `waziIOS/SupabaseConfig.swift`
+- `supabase/schema.sql`
+
+只要给 App 配置下面两个环境变量，就会自动从本地 mock 切到 Supabase：
+
+- `SUPABASE_URL`
+- `SUPABASE_ANON_KEY`
+
+你可以在 Xcode 的 Scheme 里配置：
+
+1. `Product -> Scheme -> Edit Scheme`
+2. 选择 `Run`
+3. 打开 `Arguments`
+4. 在 `Environment Variables` 里新增上面两个值
+
 ## 当前数据层说明
 
 当前版本默认使用 `LocalOrderRepository`，也就是本地内存数据，适合做页面演示和交互验证。
 
-`ShopStore` 已经改成依赖 `OrderRepository` 协议，这样后续接入 Supabase 时，只需要新增一个 `SupabaseOrderRepository`，再在 `waziIOSApp.swift` 里切换注入即可，不需要重写现有页面。
+如果检测到 `SUPABASE_URL` 和 `SUPABASE_ANON_KEY`，应用会自动切到 `SupabaseOrderRepository`。
+
+`ShopStore` 已经改成依赖 `OrderRepository` 协议，所以页面层不需要因为后端切换而重写。
 
 ## 下一步建议
 
-1. 接入 `supabase-swift`
-2. 新建 `orders` 表与后台发货字段
-3. 把本地订单创建、地址提交、发货状态更新改为真实 API
-4. 给后台页增加订单详情和物流单号输入
-5. 把支付宝收款码替换为真实静态图片资源
+1. 给后台页增加订单详情和物流单号输入框
+2. 收紧 Supabase RLS，把匿名更新改成 service role 或 Edge Function
+3. 把支付宝收款码替换为真实静态图片资源
+4. 接入真实支付确认机制
+5. 增加库存表而不是写死库存数
 
 ## 建议的 Supabase 表结构
 
@@ -91,4 +113,4 @@
 
 ## 备注
 
-当前仓库里还没有真正安装 Supabase Swift SDK，也没有提交数据库迁移文件。这一层已经留好了接入位置，适合下一步继续往真实后端推进。
+当前版本没有安装 `supabase-swift`，而是先用 REST API 直连 Supabase，这样改动更轻，也更容易先跑通 MVP。

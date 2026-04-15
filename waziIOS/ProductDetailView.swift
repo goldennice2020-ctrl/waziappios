@@ -114,7 +114,7 @@ struct ProductDetailView: View {
                 .font(.system(size: 18, weight: .semibold))
 
             HStack(alignment: .bottom) {
-                Text("¥\(store.price)")
+                Text("¥\(store.product.price)")
                     .font(.system(size: 36, weight: .bold, design: .serif))
                 Text("/ \(store.product.packDescription)")
                     .foregroundStyle(.secondary)

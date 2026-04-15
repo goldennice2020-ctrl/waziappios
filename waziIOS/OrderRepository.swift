@@ -11,8 +11,10 @@ protocol OrderRepository {
     var product: ProductSnapshot { get }
     var inventoryCount: Int { get }
 
-    func seedOrders() -> [SockOrder]
-    func createPaidOrder(color: SockColor, existingOrdersCount: Int) -> SockOrder
+    func loadOrders() async throws -> [SockOrder]
+    func createPaidOrder(color: SockColor, existingOrdersCount: Int) async throws -> SockOrder
+    func saveAddress(orderID: UUID, address: ShippingAddress) async throws
+    func markShipped(orderID: UUID, trackingNumber: String) async throws
 }
 
 struct LocalOrderRepository: OrderRepository {
@@ -26,7 +28,7 @@ struct LocalOrderRepository: OrderRepository {
 
     let inventoryCount = 88
 
-    func seedOrders() -> [SockOrder] {
+    func loadOrders() async throws -> [SockOrder] {
         let prefix = currentDatePrefix()
 
         return [
@@ -57,7 +59,7 @@ struct LocalOrderRepository: OrderRepository {
         ]
     }
 
-    func createPaidOrder(color: SockColor, existingOrdersCount: Int) -> SockOrder {
+    func createPaidOrder(color: SockColor, existingOrdersCount: Int) async throws -> SockOrder {
         let nextIndex = existingOrdersCount + 10001
 
         return SockOrder(
@@ -72,6 +74,16 @@ struct LocalOrderRepository: OrderRepository {
             address: nil,
             trackingNumber: nil
         )
+    }
+
+    func saveAddress(orderID: UUID, address: ShippingAddress) async throws {
+        _ = orderID
+        _ = address
+    }
+
+    func markShipped(orderID: UUID, trackingNumber: String) async throws {
+        _ = orderID
+        _ = trackingNumber
     }
 
     private func currentDatePrefix() -> String {

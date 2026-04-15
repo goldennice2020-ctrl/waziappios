@@ -14,6 +14,7 @@ struct CheckoutView: View {
 
     @State private var showingQRCode = false
     @State private var createdOrder: SockOrder?
+    @State private var isSubmitting = false
 
     var body: some View {
         ScrollView {
@@ -48,6 +49,13 @@ struct CheckoutView: View {
                 .environmentObject(store)
         }
         .navigationBarTitleDisplayMode(.inline)
+        .alert("提示", isPresented: errorAlertBinding) {
+            Button("知道了", role: .cancel) {
+                store.errorMessage = nil
+            }
+        } message: {
+            Text(store.errorMessage ?? "")
+        }
     }
 
     private var orderSummary: some View {
@@ -62,7 +70,7 @@ struct CheckoutView: View {
                 Text("应付金额")
                     .foregroundStyle(.secondary)
                 Spacer()
-                Text("¥\(store.price)")
+                Text("¥\(store.product.price)")
                     .font(.system(size: 30, weight: .bold, design: .serif))
             }
         }
@@ -114,14 +122,23 @@ struct CheckoutView: View {
                     .font(.system(size: 120))
             }
 
-            Text("请使用支付宝扫码支付 ¥\(store.price)")
+            Text("请使用支付宝扫码支付 ¥\(store.product.price)")
                 .foregroundStyle(.secondary)
 
             Button {
-                showingQRCode = false
-                createdOrder = store.createPaidOrder(color: selectedColor)
+                isSubmitting = true
+                Task {
+                    let order = await store.createPaidOrder(color: selectedColor)
+                    await MainActor.run {
+                        createdOrder = order
+                        if order != nil {
+                            showingQRCode = false
+                        }
+                        isSubmitting = false
+                    }
+                }
             } label: {
-                Text("我已完成付款")
+                Text(isSubmitting ? "提交中..." : "我已完成付款")
                     .font(.system(size: 17, weight: .semibold))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 18)
@@ -129,6 +146,7 @@ struct CheckoutView: View {
                     .foregroundStyle(.white)
                     .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
             }
+            .disabled(isSubmitting)
             .padding(.horizontal, 24)
 
             Spacer()
@@ -145,6 +163,17 @@ struct CheckoutView: View {
             Text(value)
                 .fontWeight(.medium)
         }
+    }
+
+    private var errorAlertBinding: Binding<Bool> {
+        Binding(
+            get: { store.errorMessage != nil },
+            set: { isPresented in
+                if !isPresented {
+                    store.errorMessage = nil
+                }
+            }
+        )
     }
 }
 

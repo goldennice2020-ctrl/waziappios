@@ -17,6 +17,7 @@ struct AddressFormView: View {
     @State private var phone = ""
     @State private var detail = ""
     @State private var goToOrder = false
+    @State private var isSubmitting = false
 
     private var isValid: Bool {
         !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
@@ -52,11 +53,19 @@ struct AddressFormView: View {
                 }
 
                 Button {
+                    isSubmitting = true
                     let address = ShippingAddress(name: name, phone: phone, detail: detail)
-                    store.saveAddress(for: orderID, address: address)
-                    goToOrder = true
+                    Task {
+                        let success = await store.saveAddress(for: orderID, address: address)
+                        await MainActor.run {
+                            isSubmitting = false
+                            if success {
+                                goToOrder = true
+                            }
+                        }
+                    }
                 } label: {
-                    Text("提交地址")
+                    Text(isSubmitting ? "提交中..." : "提交地址")
                         .font(.system(size: 17, weight: .semibold))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 18)
@@ -64,7 +73,7 @@ struct AddressFormView: View {
                         .foregroundStyle(.white)
                         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
                 }
-                .disabled(!isValid)
+                .disabled(!isValid || isSubmitting)
             }
             .padding(24)
         }
@@ -73,6 +82,24 @@ struct AddressFormView: View {
             SuccessView(orderID: orderID)
                 .environmentObject(store)
         }
+        .alert("提示", isPresented: errorAlertBinding) {
+            Button("知道了", role: .cancel) {
+                store.errorMessage = nil
+            }
+        } message: {
+            Text(store.errorMessage ?? "")
+        }
+    }
+
+    private var errorAlertBinding: Binding<Bool> {
+        Binding(
+            get: { store.errorMessage != nil },
+            set: { isPresented in
+                if !isPresented {
+                    store.errorMessage = nil
+                }
+            }
+        )
     }
 
     private func infoCard(order: SockOrder) -> some View {

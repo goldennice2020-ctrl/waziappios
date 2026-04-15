@@ -25,4 +25,13 @@ enum AppEnvironment {
     static var backendMode: BackendMode {
         SupabaseConfig.isConfigured ? .supabase : .localMock
     }
+
+    static func makeRepository() -> OrderRepository {
+        switch backendMode {
+        case .localMock:
+            return LocalOrderRepository()
+        case .supabase:
+            return SupabaseOrderRepository()
+        }
+    }
 }
