@@ -22,6 +22,7 @@ struct CheckoutView: View {
                 Text("支付页")
                     .font(.system(size: 30, weight: .bold, design: .serif))
 
+                paymentHero
                 orderSummary
                 paymentSection
 
@@ -58,11 +59,36 @@ struct CheckoutView: View {
         }
     }
 
+    private var paymentHero: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("确认你要的颜色，然后完成付款。")
+                .font(.system(size: 24, weight: .semibold, design: .serif))
+
+            Text("这一版采用支付宝收款码确认支付。付款完成后，再填写收货地址。")
+                .font(.system(size: 15))
+                .foregroundStyle(.secondary)
+                .lineSpacing(3)
+
+            HStack(spacing: 12) {
+                heroBadge(title: selectedColor.name, tint: selectedColor.tint, useStroke: selectedColor == .white)
+                heroBadge(title: store.product.packDescription, tint: Color.black, useStroke: false)
+                heroBadge(title: "¥\(store.product.price)", tint: Color(red: 0.07, green: 0.58, blue: 0.95), useStroke: false)
+            }
+        }
+        .padding(22)
+        .background(Color.white.opacity(0.82))
+        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+    }
+
     private var orderSummary: some View {
         VStack(alignment: .leading, spacing: 14) {
+            Text("订单信息")
+                .font(.system(size: 18, weight: .semibold))
+
             summaryRow(title: "商品", value: store.product.name)
             summaryRow(title: "颜色", value: selectedColor.name)
             summaryRow(title: "套餐", value: store.product.packDescription)
+            summaryRow(title: "下单规则", value: "每单一件")
 
             Divider()
 
@@ -84,19 +110,47 @@ struct CheckoutView: View {
             Text("支付方式")
                 .font(.system(size: 18, weight: .semibold))
 
-            HStack {
-                Image(systemName: "circle.inset.filled")
-                    .foregroundStyle(.black)
-                Text("支付宝")
-                Spacer()
-                Text("扫码付款")
-                    .foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 14) {
+                HStack {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(Color(red: 0.07, green: 0.58, blue: 0.95))
+                            .frame(width: 40, height: 40)
+
+                        Text("支")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundStyle(.white)
+                    }
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("支付宝")
+                            .font(.system(size: 16, weight: .semibold))
+                        Text("扫码付款")
+                            .font(.system(size: 13))
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Spacer()
+
+                    Text("推荐")
+                        .font(.system(size: 12, weight: .semibold))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(Color.black.opacity(0.06))
+                        .clipShape(Capsule())
+                }
+
+                VStack(alignment: .leading, spacing: 10) {
+                    paymentStep(index: 1, text: "点击确认支付，展示支付宝收款码")
+                    paymentStep(index: 2, text: "用支付宝扫码并完成转账")
+                    paymentStep(index: 3, text: "返回 App，点击“我已完成付款”")
+                }
             }
             .padding(18)
             .background(Color.white)
             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
 
-            Text("MVP 版本不接官方支付接口，点击确认支付后展示收款二维码，由用户自行扫码完成付款。")
+            Text("MVP 版本暂不接官方支付回调，所以订单会先进入“待人工确认 / 待填写地址”流程。")
                 .font(.system(size: 13))
                 .foregroundStyle(.secondary)
                 .lineSpacing(3)
@@ -113,17 +167,17 @@ struct CheckoutView: View {
             Text("支付宝收款码")
                 .font(.system(size: 24, weight: .bold, design: .serif))
 
-            ZStack {
-                RoundedRectangle(cornerRadius: 28, style: .continuous)
-                    .fill(Color.white)
-                    .frame(width: 240, height: 240)
-
-                Image(systemName: "qrcode")
-                    .font(.system(size: 120))
-            }
+            qrPanel
 
             Text("请使用支付宝扫码支付 ¥\(store.product.price)")
                 .foregroundStyle(.secondary)
+
+            VStack(alignment: .leading, spacing: 8) {
+                paymentInfoRow(title: "收款说明", value: "WAZI 袜子商店")
+                paymentInfoRow(title: "订单内容", value: "\(selectedColor.name) / \(store.product.packDescription)")
+                paymentInfoRow(title: "到账后", value: "继续填写收货地址")
+            }
+            .padding(.horizontal, 24)
 
             Button {
                 isSubmitting = true
@@ -155,6 +209,47 @@ struct CheckoutView: View {
         .background(Color(red: 0.95, green: 0.94, blue: 0.91).ignoresSafeArea())
     }
 
+    private var qrPanel: some View {
+        VStack(spacing: 16) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 32, style: .continuous)
+                    .fill(Color.white)
+                    .frame(width: 272, height: 312)
+                    .shadow(color: .black.opacity(0.08), radius: 24, y: 10)
+
+                VStack(spacing: 18) {
+                    HStack(spacing: 10) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                .fill(Color(red: 0.07, green: 0.58, blue: 0.95))
+                                .frame(width: 34, height: 34)
+
+                            Text("支")
+                                .font(.system(size: 17, weight: .bold))
+                                .foregroundStyle(.white)
+                        }
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("支付宝扫码付款")
+                                .font(.system(size: 16, weight: .semibold))
+                            Text("示意收款页")
+                                .font(.system(size: 12))
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+
+                    FauxQRCodeView()
+                        .frame(width: 188, height: 188)
+
+                    Text("后续可替换为真实收款码图片资源")
+                        .font(.system(size: 12))
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.horizontal, 24)
+            }
+        }
+    }
+
     private func summaryRow(title: String, value: String) -> some View {
         HStack {
             Text(title)
@@ -162,6 +257,47 @@ struct CheckoutView: View {
             Spacer()
             Text(value)
                 .fontWeight(.medium)
+        }
+    }
+
+    private func heroBadge(title: String, tint: Color, useStroke: Bool) -> some View {
+        HStack(spacing: 8) {
+            Circle()
+                .fill(tint)
+                .frame(width: 12, height: 12)
+                .overlay(Circle().stroke(useStroke ? Color.black.opacity(0.15) : Color.clear, lineWidth: 1))
+
+            Text(title)
+                .font(.system(size: 14, weight: .semibold))
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(Color.black.opacity(0.05))
+        .clipShape(Capsule())
+    }
+
+    private func paymentStep(index: Int, text: String) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Text("\(index)")
+                .font(.system(size: 12, weight: .bold))
+                .frame(width: 22, height: 22)
+                .background(Color.black)
+                .foregroundStyle(.white)
+                .clipShape(Circle())
+
+            Text(text)
+                .font(.system(size: 14))
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private func paymentInfoRow(title: String, value: String) -> some View {
+        HStack {
+            Text(title)
+                .foregroundStyle(.secondary)
+            Spacer()
+            Text(value)
+                .font(.system(size: 14, weight: .medium))
         }
     }
 
@@ -174,6 +310,55 @@ struct CheckoutView: View {
                 }
             }
         )
+    }
+}
+
+private struct FauxQRCodeView: View {
+    private let cells = 17
+
+    var body: some View {
+        VStack(spacing: 4) {
+            ForEach(0..<cells, id: \.self) { row in
+                HStack(spacing: 4) {
+                    ForEach(0..<cells, id: \.self) { column in
+                        RoundedRectangle(cornerRadius: 2, style: .continuous)
+                            .fill(isDark(row: row, column: column) ? Color.black : Color.white)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .aspectRatio(1, contentMode: .fit)
+                    }
+                }
+            }
+        }
+        .padding(14)
+        .background(Color.white)
+        .overlay(
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .stroke(Color.black.opacity(0.08), lineWidth: 1)
+        )
+    }
+
+    private func isDark(row: Int, column: Int) -> Bool {
+        if isFinderZone(row: row, column: column, top: 0, left: 0) { return true }
+        if isFinderZone(row: row, column: column, top: 0, left: cells - 7) { return true }
+        if isFinderZone(row: row, column: column, top: cells - 7, left: 0) { return true }
+
+        let seed = (row * 31 + column * 17 + row * column) % 7
+        return seed == 0 || seed == 3 || (row + column).isMultiple(of: 5)
+    }
+
+    private func isFinderZone(row: Int, column: Int, top: Int, left: Int) -> Bool {
+        let rowRange = top..<(top + 7)
+        let columnRange = left..<(left + 7)
+        guard rowRange.contains(row), columnRange.contains(column) else {
+            return false
+        }
+
+        let localRow = row - top
+        let localColumn = column - left
+
+        let isOuter = localRow == 0 || localRow == 6 || localColumn == 0 || localColumn == 6
+        let isInner = (2...4).contains(localRow) && (2...4).contains(localColumn)
+        return isOuter || isInner
     }
 }
 
