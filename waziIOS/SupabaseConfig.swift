@@ -26,6 +26,15 @@ enum AppEnvironment {
         SupabaseConfig.isConfigured ? .supabase : .localMock
     }
 
+    static var backendLabel: String {
+        switch backendMode {
+        case .localMock:
+            return "本地演示数据"
+        case .supabase:
+            return "Supabase 已连接"
+        }
+    }
+
     static func makeRepository() -> OrderRepository {
         switch backendMode {
         case .localMock:

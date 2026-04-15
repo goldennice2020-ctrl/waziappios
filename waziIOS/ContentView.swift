@@ -26,6 +26,7 @@ struct ContentView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 28) {
                         landingHeader
+                        backendBadge
                         heroCard
                         philosophyCard
 
@@ -104,6 +105,28 @@ struct ContentView: View {
             }
             .padding(28)
         }
+    }
+
+    private var backendBadge: some View {
+        HStack(spacing: 10) {
+            Circle()
+                .fill(AppEnvironment.backendMode == .supabase ? Color.green : Color.orange)
+                .frame(width: 10, height: 10)
+
+            Text(AppEnvironment.backendLabel)
+                .font(.system(size: 14, weight: .medium))
+
+            if store.isLoading {
+                Spacer()
+                ProgressView()
+                    .tint(.black)
+                    .scaleEffect(0.8)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(Color.white.opacity(0.7))
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
     }
 
     private var philosophyCard: some View {
