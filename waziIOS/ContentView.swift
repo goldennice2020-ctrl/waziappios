@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject private var store = ShopStore()
+    @EnvironmentObject private var store: ShopStore
 
     var body: some View {
         NavigationStack {
@@ -74,7 +74,7 @@ struct ContentView: View {
             Text("好一点的袜子")
                 .font(.system(size: 38, weight: .bold, design: .serif))
 
-            Text("高品质袜子")
+            Text(store.product.subtitle)
                 .font(.system(size: 18, weight: .medium))
                 .foregroundStyle(Color.black.opacity(0.65))
         }

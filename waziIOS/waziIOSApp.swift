@@ -9,9 +9,12 @@ import SwiftUI
 
 @main
 struct waziIOSApp: App {
+    @StateObject private var store = ShopStore()
+
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(store)
         }
     }
 }

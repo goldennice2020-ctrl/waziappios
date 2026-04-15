@@ -52,9 +52,9 @@ struct CheckoutView: View {
 
     private var orderSummary: some View {
         VStack(alignment: .leading, spacing: 14) {
-            summaryRow(title: "商品", value: store.productName)
+            summaryRow(title: "商品", value: store.product.name)
             summaryRow(title: "颜色", value: selectedColor.name)
-            summaryRow(title: "套餐", value: store.packDescription)
+            summaryRow(title: "套餐", value: store.product.packDescription)
 
             Divider()
 

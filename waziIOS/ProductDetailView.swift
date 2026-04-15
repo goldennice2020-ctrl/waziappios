@@ -17,10 +17,10 @@ struct ProductDetailView: View {
                 productHero
 
                 VStack(alignment: .leading, spacing: 10) {
-                    Text(store.productName)
+                    Text(store.product.name)
                         .font(.system(size: 32, weight: .bold, design: .serif))
 
-                    Text(store.productDescription)
+                    Text(store.product.description)
                         .foregroundStyle(.secondary)
                         .lineSpacing(4)
                 }
@@ -116,7 +116,7 @@ struct ProductDetailView: View {
             HStack(alignment: .bottom) {
                 Text("¥\(store.price)")
                     .font(.system(size: 36, weight: .bold, design: .serif))
-                Text("/ \(store.packDescription)")
+                Text("/ \(store.product.packDescription)")
                     .foregroundStyle(.secondary)
                     .padding(.bottom, 6)
             }

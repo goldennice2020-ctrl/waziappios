@@ -8,6 +8,14 @@
 import SwiftUI
 import Combine
 
+struct ProductSnapshot: Hashable {
+    let name: String
+    let subtitle: String
+    let packDescription: String
+    let description: String
+    let price: Int
+}
+
 enum SockColor: String, CaseIterable, Identifiable, Codable {
     case black
     case white
@@ -101,46 +109,17 @@ struct SockOrder: Identifiable, Hashable, Codable {
 
 @MainActor
 final class ShopStore: ObservableObject {
-    let productName = "好一点的袜子"
-    let subtitle = "高品质袜子"
-    let packDescription = "5双装"
-    let productDescription = "一款足够好的基础袜，减少选择，减少犹豫。"
-    let price = 15
-
+    let product: ProductSnapshot
     @Published var inventoryCount = 88
     @Published var orders: [SockOrder] = []
 
-    init() {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyyMMdd"
-        let prefix = formatter.string(from: Date())
+    private let repository: OrderRepository
 
-        orders = [
-            SockOrder(
-                id: UUID(),
-                orderNumber: "\(prefix)-10001",
-                color: .black,
-                amount: 15,
-                packDescription: "5双装",
-                createdAt: Date().addingTimeInterval(-86_400),
-                paymentState: .paid,
-                shippingState: .readyToShip,
-                address: ShippingAddress(name: "张三", phone: "13800008888", detail: "上海市静安区南京西路 188 号"),
-                trackingNumber: nil
-            ),
-            SockOrder(
-                id: UUID(),
-                orderNumber: "\(prefix)-10002",
-                color: .white,
-                amount: 15,
-                packDescription: "5双装",
-                createdAt: Date().addingTimeInterval(-43_200),
-                paymentState: .paid,
-                shippingState: .waitingForAddress,
-                address: nil,
-                trackingNumber: nil
-            )
-        ]
+    init(repository: OrderRepository = LocalOrderRepository()) {
+        self.repository = repository
+        self.product = repository.product
+        self.inventoryCount = repository.inventoryCount
+        self.orders = repository.seedOrders()
     }
 
     var orderCount: Int {
@@ -159,25 +138,7 @@ final class ShopStore: ObservableObject {
         if inventoryCount > 0 {
             inventoryCount -= 1
         }
-
-        let nextIndex = (orders.count + 10001)
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyyMMdd"
-        let prefix = formatter.string(from: Date())
-
-        let order = SockOrder(
-            id: UUID(),
-            orderNumber: "\(prefix)-\(nextIndex)",
-            color: color,
-            amount: price,
-            packDescription: packDescription,
-            createdAt: Date(),
-            paymentState: .paid,
-            shippingState: .waitingForAddress,
-            address: nil,
-            trackingNumber: nil
-        )
-
+        let order = repository.createPaidOrder(color: color, existingOrdersCount: orders.count)
         orders.insert(order, at: 0)
         return order
     }

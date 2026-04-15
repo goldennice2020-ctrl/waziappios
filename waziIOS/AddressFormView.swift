@@ -81,7 +81,7 @@ struct AddressFormView: View {
                 .font(.system(size: 15, weight: .semibold))
 
             row(title: "订单号", value: order.orderNumber)
-            row(title: "商品", value: store.productName)
+            row(title: "商品", value: store.product.name)
             row(title: "颜色", value: order.color.name)
             row(title: "金额", value: "¥\(order.amount)")
         }

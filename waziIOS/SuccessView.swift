@@ -65,7 +65,7 @@ struct SuccessView: View {
                 .font(.system(size: 18, weight: .semibold))
 
             detailRow(title: "订单号", value: order.orderNumber)
-            detailRow(title: "商品", value: store.productName)
+            detailRow(title: "商品", value: store.product.name)
             detailRow(title: "颜色", value: order.color.name)
             detailRow(title: "套餐", value: order.packDescription)
             detailRow(title: "支付金额", value: "¥\(order.amount)")

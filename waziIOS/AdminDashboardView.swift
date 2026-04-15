@@ -61,7 +61,7 @@ struct AdminDashboardView: View {
             Text(order.orderNumber)
                 .font(.system(size: 16, weight: .bold))
 
-            adminRow(title: "商品", value: store.productName)
+            adminRow(title: "商品", value: store.product.name)
             adminRow(title: "金额", value: "¥\(order.amount)")
             adminRow(title: "支付状态", value: order.paymentState.rawValue)
             adminRow(title: "地址状态", value: order.hasAddress ? "已填写" : "未填写")
