@@ -1,0 +1,5 @@
+// Copy this file to a local xcconfig file and replace the placeholder values.
+// Then wire it into your Xcode scheme or project configuration if desired.
+
+SUPABASE_URL = https://your-project-id.supabase.co
+SUPABASE_ANON_KEY = your-anon-key

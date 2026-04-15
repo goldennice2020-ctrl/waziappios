@@ -58,6 +58,21 @@ struct ContentView: View {
                             .background(Color.white.opacity(0.6))
                             .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
                         }
+
+                        NavigationLink {
+                            SupabaseSetupView()
+                        } label: {
+                            HStack {
+                                Text("查看 Supabase 配置指南")
+                                Spacer()
+                                Image(systemName: "slider.horizontal.3")
+                            }
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundStyle(Color.black.opacity(0.72))
+                            .padding(20)
+                            .background(Color.white.opacity(0.6))
+                            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                        }
                     }
                     .padding(24)
                 }

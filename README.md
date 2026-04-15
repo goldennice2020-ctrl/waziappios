@@ -41,6 +41,10 @@
   数据仓储协议与本地 mock 实现
 - `waziIOS/SupabaseConfig.swift`
   Supabase 环境占位与后端模式切换
+- `waziIOS/SupabaseSetupView.swift`
+  App 内 Supabase 配置与诊断页
+- `Config/Supabase.xcconfig.example`
+  本地配置模板
 
 ## 运行方式
 
@@ -72,6 +76,10 @@
 2. 选择 `Run`
 3. 打开 `Arguments`
 4. 在 `Environment Variables` 里新增上面两个值
+
+仓库也提供了一份模板文件：
+
+- `Config/Supabase.xcconfig.example`
 
 ## 当前数据层说明
 
