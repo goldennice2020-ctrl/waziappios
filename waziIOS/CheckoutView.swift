@@ -229,24 +229,43 @@ struct CheckoutView: View {
                                 .foregroundStyle(.white)
                         }
 
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("支付宝扫码付款")
-                                .font(.system(size: 16, weight: .semibold))
-                            Text("示意收款页")
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("支付宝扫码付款")
+                            .font(.system(size: 16, weight: .semibold))
+                            Text(PaymentAssets.hasAlipayQRCode ? "真实收款码" : "示意收款页")
                                 .font(.system(size: 12))
                                 .foregroundStyle(.secondary)
                         }
                     }
 
-                    FauxQRCodeView()
+                    qrContent
                         .frame(width: 188, height: 188)
 
-                    Text("后续可替换为真实收款码图片资源")
+                    Text(PaymentAssets.hasAlipayQRCode ? "当前已使用本地收款码资源" : "未检测到本地收款码资源，当前使用演示二维码")
                         .font(.system(size: 12))
                         .foregroundStyle(.secondary)
                 }
                 .padding(.horizontal, 24)
             }
+        }
+    }
+
+    @ViewBuilder
+    private var qrContent: some View {
+        if PaymentAssets.hasAlipayQRCode {
+            Image(PaymentAssetNames.alipayQRCode)
+                .resizable()
+                .interpolation(.none)
+                .scaledToFit()
+                .padding(10)
+                .background(Color.white)
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .stroke(Color.black.opacity(0.08), lineWidth: 1)
+                )
+        } else {
+            FauxQRCodeView()
         }
     }
 

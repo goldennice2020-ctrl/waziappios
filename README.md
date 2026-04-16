@@ -31,6 +31,8 @@
   可复用的袜子视觉陈列组件
 - `waziIOS/CheckoutView.swift`
   支付页与二维码流程
+- `waziIOS/PaymentAssets.swift`
+  支付资源名与收款码资源检测
 - `waziIOS/AddressFormView.swift`
   地址填写
 - `waziIOS/SuccessView.swift`
@@ -82,6 +84,14 @@
 仓库也提供了一份模板文件：
 
 - `Config/Supabase.xcconfig.example`
+
+支付页的真实收款码资源名固定为：
+
+- `AlipayQRCode`
+
+你只需要把真实二维码图片替换到：
+
+- `waziIOS/Assets.xcassets/AlipayQRCode.imageset`
 
 ## 当前数据层说明
 
