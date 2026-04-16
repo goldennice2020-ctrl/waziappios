@@ -10,9 +10,33 @@ import SwiftUI
 struct AdminDashboardView: View {
     @EnvironmentObject private var store: ShopStore
     @State private var showPendingOnly = false
+    @State private var searchText = ""
+    @State private var filter: AdminOrderFilter = .all
 
     private var displayedOrders: [SockOrder] {
-        showPendingOnly ? store.pendingAddressOrders : store.orders
+        let source = showPendingOnly ? store.pendingAddressOrders : store.orders
+
+        return source.filter { order in
+            let matchesSearch = searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+            order.orderNumber.localizedCaseInsensitiveContains(searchText) ||
+            order.color.name.localizedCaseInsensitiveContains(searchText) ||
+            (order.address?.name.localizedCaseInsensitiveContains(searchText) ?? false) ||
+            (order.address?.phone.localizedCaseInsensitiveContains(searchText) ?? false)
+
+            let matchesFilter: Bool
+            switch filter {
+            case .all:
+                matchesFilter = true
+            case .readyToShip:
+                matchesFilter = order.shippingState == .readyToShip
+            case .shipped:
+                matchesFilter = order.shippingState == .shipped
+            case .missingAddress:
+                matchesFilter = !order.hasAddress
+            }
+
+            return matchesSearch && matchesFilter
+        }
     }
 
     private var shippedCount: Int {
@@ -35,6 +59,9 @@ struct AdminDashboardView: View {
 
                 heroCard
                 metricsGrid
+
+                searchBar
+                filterTabs
 
                 Toggle("仅看未填地址订单", isOn: $showPendingOnly)
                     .toggleStyle(SwitchToggleStyle(tint: .black))
@@ -150,6 +177,38 @@ struct AdminDashboardView: View {
             HStack(spacing: 14) {
                 metricCard(title: "待发货", value: "\(readyToShipCount)", subtitle: "地址已完善")
                 metricCard(title: "缺地址", value: "\(missingAddressCount)", subtitle: "待用户补充")
+            }
+        }
+    }
+
+    private var searchBar: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(.secondary)
+
+            TextField("搜索订单号 / 颜色 / 收货人 / 手机号", text: $searchText)
+        }
+        .padding(16)
+        .background(Color.white.opacity(0.94))
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+    }
+
+    private var filterTabs: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 10) {
+                ForEach(AdminOrderFilter.allCases) { item in
+                    Button {
+                        filter = item
+                    } label: {
+                        Text(item.title)
+                            .font(.system(size: 14, weight: .semibold))
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 10)
+                            .background(filter == item ? Color.black : Color.white.opacity(0.92))
+                            .foregroundStyle(filter == item ? .white : .black)
+                            .clipShape(Capsule())
+                    }
+                }
             }
         }
     }
@@ -348,6 +407,24 @@ private enum AdminPillStyle {
         case .light: return Color.black
         case .dark: return Color.white
         case .warning: return Color.orange
+        }
+    }
+}
+
+private enum AdminOrderFilter: String, CaseIterable, Identifiable {
+    case all
+    case readyToShip
+    case shipped
+    case missingAddress
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .all: return "全部"
+        case .readyToShip: return "待发货"
+        case .shipped: return "已发货"
+        case .missingAddress: return "缺地址"
         }
     }
 }
