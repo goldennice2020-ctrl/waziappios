@@ -214,34 +214,45 @@ struct CheckoutView: View {
             ZStack {
                 RoundedRectangle(cornerRadius: 32, style: .continuous)
                     .fill(Color.white)
-                    .frame(width: 272, height: 312)
+                    .frame(width: PaymentAssets.hasAlipayQRCode ? 308 : 272, height: PaymentAssets.hasAlipayQRCode ? 540 : 312)
                     .shadow(color: .black.opacity(0.08), radius: 24, y: 10)
 
                 VStack(spacing: 18) {
-                    HStack(spacing: 10) {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                .fill(Color(red: 0.07, green: 0.58, blue: 0.95))
-                                .frame(width: 34, height: 34)
-
-                            Text("支")
-                                .font(.system(size: 17, weight: .bold))
-                                .foregroundStyle(.white)
-                        }
-
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("支付宝扫码付款")
-                            .font(.system(size: 16, weight: .semibold))
-                            Text(PaymentAssets.hasAlipayQRCode ? "真实收款码" : "示意收款页")
+                    if PaymentAssets.hasAlipayQRCode {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("支付宝收款海报")
+                                .font(.system(size: 16, weight: .semibold))
+                            Text("当前已加载真实图片资源，页面将完整展示这张收款海报。")
                                 .font(.system(size: 12))
                                 .foregroundStyle(.secondary)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    } else {
+                        HStack(spacing: 10) {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                    .fill(Color(red: 0.07, green: 0.58, blue: 0.95))
+                                    .frame(width: 34, height: 34)
+
+                                Text("支")
+                                    .font(.system(size: 17, weight: .bold))
+                                    .foregroundStyle(.white)
+                            }
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("支付宝扫码付款")
+                                    .font(.system(size: 16, weight: .semibold))
+                                Text("示意收款页")
+                                    .font(.system(size: 12))
+                                    .foregroundStyle(.secondary)
+                            }
                         }
                     }
 
                     qrContent
-                        .frame(width: 188, height: 188)
+                        .frame(width: PaymentAssets.hasAlipayQRCode ? 228 : 188, height: PaymentAssets.hasAlipayQRCode ? 406 : 188)
 
-                    Text(PaymentAssets.hasAlipayQRCode ? "当前已使用本地收款码资源" : "未检测到本地收款码资源，当前使用演示二维码")
+                    Text(PaymentAssets.hasAlipayQRCode ? "当前已使用本地支付宝收款码海报" : "未检测到本地收款码资源，当前使用演示二维码")
                         .font(.system(size: 12))
                         .foregroundStyle(.secondary)
                 }
@@ -255,15 +266,13 @@ struct CheckoutView: View {
         if PaymentAssets.hasAlipayQRCode {
             Image(PaymentAssetNames.alipayQRCode)
                 .resizable()
-                .interpolation(.none)
                 .scaledToFit()
-                .padding(10)
-                .background(Color.white)
-                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .stroke(Color.black.opacity(0.08), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: 22, style: .continuous)
+                        .stroke(Color.black.opacity(0.06), lineWidth: 1)
                 )
+                .shadow(color: .black.opacity(0.08), radius: 18, y: 8)
         } else {
             FauxQRCodeView()
         }
